@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./reset.css">
+  <link rel="stylesheet" href="./styles.css">
+  <title>놀이돌봄 유형 테스트</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; padding: 20px; line-height: 1.6; }
+    .hidden { display: none; }
+    .question, .form, .result { margin-bottom: 30px; }
+    button { padding: 10px 20px; margin-top: 20px; }
+    blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre {
+    margin: 0;
+    }
+   
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="./img/intro_img.gif" alt="픽셀 아바타">
+    </div>
+
+    <p class="desc">당신에게 어울리는 놀이돌봄 유형은?</p>
+
+    <button class="btn-start" onclick="startTest()">테스트 시작하기</button>
+
+  </div>
+
+  <div class="question hidden" id="question-container">
+    <div id="question-text"></div>
+    <form id="question-form"></form>
+    <button id="next-btn" onclick="nextQuestion()" disabled>다음</button>
+  </div>
+  </div>
+
+  <div class="form hidden">
+    <h3>개인정보 입력</h3>
+    <form id="user-form">
+      <label>이름: <input type="text" id="name" required></label><br><br>
+      <label>연락처: <input type="text" id="phone" required></label><br><br>
+      <label>생년월일: <input type="text" id="birth" placeholder="19990101" required></label><br><br>
+      <label><input type="checkbox" id="agree" required> 개인정보 수집 및 이용동의 (필수)</label><br><br>
+      <button type="submit">결과 보기</button>
+    </form>
+  </div>
+
+  <div class="result hidden" id="result-section">
+    <h2>당신에게 어울리는 놀이 돌봄 유형은?</h2>
+    <div class="result-img">
+      <img id="result-img" src="" alt="결과 이미지" />
+    </div>
+    <p id="result-text"></p>
+  </div>
+
+  <script>
+  const questions = [
+    {
+      q: "1. 아이들과 놀이할 때 가장 중요하다고 생각하는 것은?",
+      a: ["외국어 노출과 의사소통", "창의적 표현", "학습 습관 형성", "사고력과 어휘력 향상", "감각 자극과 탐색 활동"]
+    },
+    {
+      q: "2. 놀이 시간에 어떤 활동을 가장 선호하나요?",
+      a: ["영어 노래와 챈트", "미술 도구를 활용한 만들기", "숫자와 글자 학습", "이야기 읽기와 나누기", "촉감놀이"]
+    },
+    {
+      q: "3. 어떤 놀이교육에 가장 자신 있나요?",
+      a: ["영어 표현을 이끌어내는 놀이", "상상력을 자극하는 그림 놀이", "규칙 기반 학습 놀이", "스토리텔링 중심 놀이", "다양한 질감의 탐색 놀이"]
+    },
+    {
+      q: "4. 놀이교육을 계획할 때 고려하는 요소는?",
+      a: ["언어 및 커뮤니케이션 향상", "창의성과 몰입도", "교육적 효과", "문해력 및 집중도", "오감 발달 자극"]
+    },
+    {
+      q: "5. 아이들이 가장 좋아할 것 같은 활동은?",
+      a: ["영어 단어 퀴즈", "색종이, 클레이로 창작하기", "문제 풀기와 게임", "독서 후 질문 놀이", "소리, 촉감, 냄새로 구성된 감각놀이"]
+    }
+  ];
+
+  const results = [
+    "영어놀이 돌봄 선생님: \n 아이와 함께 영어로 놀며 언어 감각을 키우는 데 탁월해요!",
+    "미술놀이 돌봄 선생님: \n 창의력과 표현력을 키우는 예술 전문가 스타일이에요!",
+    "학습 돌봄 선생님: \n 아이의 학습 습관을 길러주는 체계적인 선생님이에요!",
+    "독서놀이 돌봄 선생님: \n 책으로 아이의 사고력과 감성을 길러주는 분이에요!",
+    "오감놀이 돌봄 선생님: \n 촉감﹒시각﹒청각 등 다양한 감각놀이를 잘 이끄는 선생님이에요!"
+  ];
+
+  const images = [
+    "./img/result_eng.png",
+    "./img/result_art.png",
+    "./img/result_study.png",
+    "./img/result_book.png",
+    "./img/result_sense.png"
+  ];
+
+  let currentQuestion = 0;
+  let answers = [];
+
+  function startTest() {
+    document.querySelector(".container").classList.add("hidden");
+    document.querySelector("#question-container").classList.remove("hidden");
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = questions[currentQuestion];
+    document.getElementById("question-text").innerText = q.q;
+    const form = document.getElementById("question-form");
+    form.innerHTML = "";
+    document.getElementById("next-btn").disabled = true;
+
+    q.a.forEach((answer, idx) => {
+      const label = document.createElement("label");
+      label.innerHTML = `
+        <input type="radio" name="answer" value="${idx}" onchange="selectAnswer(${idx})"> ${answer}<br>`;
+      form.appendChild(label);
+    });
+  }
+
+  function selectAnswer(idx) {
+    document.getElementById("next-btn").disabled = false;
+  }
+
+  function nextQuestion() {
+    const selected = document.querySelector('input[name="answer"]:checked');
+    if (!selected) return;
+    answers.push(parseInt(selected.value));
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      showQuestion();
+    } else {
+      document.getElementById("question-container").classList.add("hidden");
+      document.querySelector(".form").classList.remove("hidden");
+    }
+  }
+
+  // 최빈값 구하기 (빈 배열 방지 처리 포함)
+  function mostFrequent(arr) {
+    if (arr.length === 0) return 0;
+    const freq = {};
+    let maxCount = 0;
+    let maxItem = arr[0];
+    arr.forEach(item => {
+      freq[item] = (freq[item] || 0) + 1;
+      if (freq[item] > maxCount) {
+        maxCount = freq[item];
+        maxItem = item;
+      }
+    });
+    return maxItem;
+  }
+
+  // 결과 제출 및 표시
+  document.getElementById("user-form").onsubmit = async function(e) {
+    e.preventDefault();
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const birth = document.getElementById("birth").value.trim();
+    const agree = document.getElementById("agree").checked;
+
+    if (!name || !phone || !agree) return alert("모든 항목을 입력하고 동의해주세요.");
+
+    const resultIndex = mostFrequent(answers);
+    const resultText  = results[resultIndex];
+
+    document.querySelector(".form").classList.add("hidden");
+    document.querySelector("#result-section").classList.remove("hidden");
+    document.getElementById("result-text").innerText = resultText;
+    document.getElementById("result-img").src = images[resultIndex];
+
+    console.log("resultIndex:", resultIndex);
+    console.log("image path:", images[resultIndex]);
+
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbyve_1NceFCfKOUUaoHrUupnsUGa8Yhun8hSlWZ4isdeOtXHvBWPuB60-lzcQoko3DN7g/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, result: resultText })
+      });
+    } catch (err) {
+      console.error("데이터 전송 오류:", err);
+    }
+  };
+</script>
+</body>
+</html>
